@@ -26,14 +26,7 @@ export const authService = {
 
   getCurrentUser() {
     const userStr = localStorage.getItem('user')
-    if (!userStr || userStr === 'undefined' || userStr === 'null') {
-      return null
-    }
-    try {
-      return JSON.parse(userStr)
-    } catch (e) {
-      return null
-    }
+    return userStr ? JSON.parse(userStr) : null
   },
 
   getToken() {
