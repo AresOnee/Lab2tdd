@@ -33,7 +33,7 @@ public class EstadisticasRepository {
             s.descripcion,
             s.tipo,
             s.calificacion_promedio,
-            s.total_reseñas,
+            s.total_resenas,
             ST_Y(s.ubicacion::geometry) AS latitud,
             ST_X(s.ubicacion::geometry) AS longitud,
             ST_Distance(
@@ -59,7 +59,7 @@ public class EstadisticasRepository {
             sitio.setLatitud(rs.getDouble("latitud"));
             sitio.setLongitud(rs.getDouble("longitud"));
             sitio.setCalificacionPromedio(rs.getDouble("calificacion_promedio"));
-            sitio.setTotalreseñas(rs.getInt("total_reseñas"));
+            sitio.setTotalresenas(rs.getInt("total_resenas"));
 
             // 2. Mapeo del DTO respuesta
             SitioCercanoResponse response = new SitioCercanoResponse();
@@ -107,18 +107,18 @@ public class EstadisticasRepository {
                 SELECT
                     tipo,
                     AVG(calificacion_promedio) AS calificacion_promedio_general,
-                    SUM(total_reseñas) AS total_reseñas_general
+                    SUM(total_resenas) AS total_resenas_general
                 FROM
                     sitios_turisticos
                 GROUP BY
                     tipo
-                ORDER BY total_reseñas_general DESC
+                ORDER BY total_resenas_general DESC
                 """;
 
         return jdbc.query(sql, (rs, rowNum) -> new EstadisticasPorTipoResponse(
                 rs.getString("tipo"),
                 rs.getDouble("calificacion_promedio_general"),
-                rs.getInt("total_reseñas_general")
+                rs.getInt("total_resenas_general")
         ));
     }
 
@@ -165,20 +165,20 @@ public class EstadisticasRepository {
                 SELECT
                     nombre,
                     calificacion_promedio,
-                    total_reseñas
+                    total_resenas
                 FROM
                     sitios_turisticos
                 WHERE
                     calificacion_promedio > 4.5
-                    AND total_reseñas < 10
-                    AND total_reseñas > 0
+                    AND total_resenas < 10
+                    AND total_resenas > 0
                 ORDER BY calificacion_promedio DESC
                 """;
 
         return jdbc.query(sql, (rs, rowNum) -> new SitioValoracionInusualResponse(
                 rs.getString("nombre"),
                 rs.getDouble("calificacion_promedio"),
-                rs.getInt("total_reseñas")
+                rs.getInt("total_resenas")
         ));
     }
 
@@ -273,7 +273,7 @@ public class EstadisticasRepository {
         return jdbc.query(sql, (rs, rowNum) -> new ResumenContribucionesResponse(
                 rs.getLong("id_usuario"),
                 rs.getString("nombre"),
-                rs.getInt("total_reseñas"),
+                rs.getInt("total_resenas"),
                 rs.getInt("total_fotos"),
                 rs.getInt("total_listas")
         ));
@@ -285,7 +285,7 @@ public class EstadisticasRepository {
         String sql = """
                 SELECT 
                     ciudad AS region, 
-                    SUM(total_reseñas) AS total_resenas_por_ciudad
+                    SUM(total_resenas) AS total_resenas_por_ciudad
                 FROM 
                     sitios_turisticos
                 WHERE 
