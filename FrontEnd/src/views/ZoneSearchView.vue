@@ -124,7 +124,7 @@
                 <p class="site-description">{{ truncateText(site.descripcion, 100) }}</p>
                 <div class="site-stats">
                   <span class="rating">{{ site.calificacionPromedio?.toFixed(1) || 'N/A' }} ★</span>
-                  <span class="reviews">{{ site.totalResenas || 0 }} reseñas</span>
+                  <span class="reviews">{{ site.totalreseñas || 0 }} reseñas</span>
                 </div>
                 <router-link :to="`/sitios/${site.id}`" class="btn-view-detail">
                   Ver Detalles
@@ -153,7 +153,7 @@
           <p class="site-card-description">{{ truncateText(site.descripcion, 150) }}</p>
           <div class="site-card-footer">
             <span class="rating">{{ site.calificacionPromedio?.toFixed(1) || 'N/A' }} ★</span>
-            <span class="reviews">{{ site.totalResenas || 0 }} reseñas</span>
+            <span class="reviews">{{ site.totalreseñas || 0 }} reseñas</span>
           </div>
         </div>
       </div>
