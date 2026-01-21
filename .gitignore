@@ -1,0 +1,9 @@
+/backend/target
+/FrontEnd/node_modules
+.idea/vcs.xml
+.idea/modules.xml
+.idea/misc.xml
+.idea/Lab2tdd.iml
+.idea/jarRepositories.xml
+.idea/encodings.xml
+.idea/compiler.xml
