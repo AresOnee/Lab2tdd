@@ -37,14 +37,14 @@ public class SitioTuristicoRepository {
                     rs.getDouble("latitud"), // Obtenido del alias ST_Y
                     rs.getDouble("longitud"), // Obtenido del alias ST_X
                     rs.getDouble("calificacion_promedio"),
-                    rs.getInt("total_reseñas")
+                    rs.getInt("total_resenas")
             );
         }
     };
 
     // Columnas base para las consultas SELECT
     private static final String SELECT_COLUMNS =
-        "id, nombre, descripcion, tipo, calificacion_promedio, total_reseñas, " +
+        "id, nombre, descripcion, tipo, calificacion_promedio, total_resenas, " +
         "ST_Y(ubicacion::geometry) AS latitud, " +
         "ST_X(ubicacion::geometry) AS longitud ";
 
@@ -128,8 +128,8 @@ public class SitioTuristicoRepository {
     public List<SitioTuristico> findPopulares() {
         String sql = "SELECT " + SELECT_COLUMNS +
                      "FROM sitios_turisticos " +
-                     "WHERE total_reseñas > 0 " +
-                     "ORDER BY calificacion_promedio DESC, total_reseñas DESC " +
+                     "WHERE total_resenas > 0 " +
+                     "ORDER BY calificacion_promedio DESC, total_resenas DESC " +
                      "LIMIT 10";
         return jdbc.query(sql, MAPPER);
     }
@@ -161,7 +161,7 @@ public class SitioTuristicoRepository {
                 descripcion,
                 tipo,
                 calificacion_promedio,
-                total_reseñas,
+                total_resenas,
                 ST_Y(ubicacion::geometry) AS latitud,
                 ST_X(ubicacion::geometry) AS longitud
             FROM buscar_sitios_cercanos(:longitud, :latitud, :radio)
@@ -203,7 +203,7 @@ public class SitioTuristicoRepository {
 
         String sql = """
             SELECT
-                id, nombre, descripcion, tipo, calificacion_promedio, total_reseñas,
+                id, nombre, descripcion, tipo, calificacion_promedio, total_resenas,
                 ST_Y(ubicacion::geometry) AS latitud,
                 ST_X(ubicacion::geometry) AS longitud
             FROM sitios_turisticos

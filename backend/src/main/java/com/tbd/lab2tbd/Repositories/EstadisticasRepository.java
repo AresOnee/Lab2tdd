@@ -33,7 +33,7 @@ public class EstadisticasRepository {
             s.descripcion,
             s.tipo,
             s.calificacion_promedio,
-            s.total_reseñas,
+            s.total_resenas,
             ST_Y(s.ubicacion::geometry) AS latitud,
             ST_X(s.ubicacion::geometry) AS longitud,
             ST_Distance(
@@ -59,7 +59,7 @@ public class EstadisticasRepository {
             sitio.setLatitud(rs.getDouble("latitud"));
             sitio.setLongitud(rs.getDouble("longitud"));
             sitio.setCalificacionPromedio(rs.getDouble("calificacion_promedio"));
-            sitio.setTotalreseñas(rs.getInt("total_reseñas"));
+            sitio.setTotalresenas(rs.getInt("total_resenas"));
 
             // 2. Mapeo del DTO respuesta
             SitioCercanoResponse response = new SitioCercanoResponse();
@@ -107,18 +107,18 @@ public class EstadisticasRepository {
                 SELECT
                     tipo,
                     AVG(calificacion_promedio) AS calificacion_promedio_general,
-                    SUM(total_reseñas) AS total_reseñas_general
+                    SUM(total_resenas) AS total_resenas_general
                 FROM
                     sitios_turisticos
                 GROUP BY
                     tipo
-                ORDER BY total_reseñas_general DESC
+                ORDER BY total_resenas_general DESC
                 """;
 
         return jdbc.query(sql, (rs, rowNum) -> new EstadisticasPorTipoResponse(
                 rs.getString("tipo"),
                 rs.getDouble("calificacion_promedio_general"),
-                rs.getInt("total_reseñas_general")
+                rs.getInt("total_resenas_general")
         ));
     }
 
@@ -127,12 +127,12 @@ public class EstadisticasRepository {
      */
     public List<TopResenadorResponse> obtenerTopResenadores() {
         String sql = """
-                WITH reseñasRecientes AS (
+                WITH resenasRecientes AS (
                     SELECT
                         id_usuario,
-                        COUNT(*) AS conteo_reseñas
+                        COUNT(*) AS conteo_resenas
                     FROM
-                        reseñas
+                        resenas
                     WHERE
                         fecha >= (CURRENT_TIMESTAMP - INTERVAL '6 months')
                     GROUP BY
@@ -140,51 +140,51 @@ public class EstadisticasRepository {
                 )
                 SELECT
                     u.nombre AS nombre_usuario,
-                    rr.conteo_reseñas
+                    rr.conteo_resenas
                 FROM
-                    reseñasRecientes rr
+                    resenasRecientes rr
                 JOIN
                     usuarios u ON rr.id_usuario = u.id
                 ORDER BY
-                    rr.conteo_reseñas DESC
+                    rr.conteo_resenas DESC
                 LIMIT 5
                 """;
 
         return jdbc.query(sql, (rs, rowNum) -> new TopResenadorResponse(
                 rs.getString("nombre_usuario"),
-                rs.getInt("conteo_reseñas")
+                rs.getInt("conteo_resenas")
         ));
     }
 
     /**
      * Consulta #4: Detección de Sitios con Valoraciones Inusuales
-     * (Promedio > 4.5, < 10 reseñas)
+     * (Promedio > 4.5, < 10 resenas)
      */
     public List<SitioValoracionInusualResponse> obtenerSitiosValoracionInusual() {
         String sql = """
                 SELECT
                     nombre,
                     calificacion_promedio,
-                    total_reseñas
+                    total_resenas
                 FROM
                     sitios_turisticos
                 WHERE
                     calificacion_promedio > 4.5
-                    AND total_reseñas < 10
-                    AND total_reseñas > 0
+                    AND total_resenas < 10
+                    AND total_resenas > 0
                 ORDER BY calificacion_promedio DESC
                 """;
 
         return jdbc.query(sql, (rs, rowNum) -> new SitioValoracionInusualResponse(
                 rs.getString("nombre"),
                 rs.getDouble("calificacion_promedio"),
-                rs.getInt("total_reseñas")
+                rs.getInt("total_resenas")
         ));
     }
 
     /**
      * Consulta #7: Listado de Sitios con Pocas Contribuciones
-     * (Sin reseñas o fotos en 3 meses)
+     * (Sin resenas o fotos en 3 meses)
      */
     public List<SitioPocasContribucionesResponse> obtenerSitiosPocasContribuciones() {
         String sql = """
@@ -193,7 +193,7 @@ public class EstadisticasRepository {
                         id_sitio,
                         MAX(fecha) AS ultima_fecha
                     FROM (
-                        SELECT id_sitio, fecha FROM reseñas
+                        SELECT id_sitio, fecha FROM resenas
                         UNION ALL
                         SELECT id_sitio, fecha FROM fotografias
                     ) AS contribuciones
@@ -224,14 +224,14 @@ public class EstadisticasRepository {
      * Consulta #8: Análisis de Contenido de Reseñas
      * (3 más largas de usuarios con promedio > 4.0)
      */
-    public List<ResenaLargaResponse> obtenerreseñasLargas() {
+    public List<ResenaLargaResponse> obtenerresenasLargas() {
         String sql = """
                 WITH PromedioUsuario AS (
                     SELECT
                         id_usuario,
                         AVG(calificacion) AS promedio_calificacion
                     FROM
-                        reseñas
+                        resenas
                     GROUP BY
                         id_usuario
                     HAVING
@@ -243,7 +243,7 @@ public class EstadisticasRepository {
                     r.contenido,
                     LENGTH(r.contenido) AS longitud_resena
                 FROM
-                    reseñas r
+                    resenas r
                 JOIN
                     usuarios u ON r.id_usuario = u.id
                 JOIN
@@ -268,12 +268,12 @@ public class EstadisticasRepository {
      * (Vista Materializada)
      */
     public List<ResumenContribucionesResponse> obtenerResumenContribuciones() {
-        String sql = "SELECT * FROM resumen_contribuciones_usuario ORDER BY total_reseñas DESC";
+        String sql = "SELECT * FROM resumen_contribuciones_usuario ORDER BY total_resenas DESC";
 
         return jdbc.query(sql, (rs, rowNum) -> new ResumenContribucionesResponse(
                 rs.getLong("id_usuario"),
                 rs.getString("nombre"),
-                rs.getInt("total_reseñas"),
+                rs.getInt("total_resenas"),
                 rs.getInt("total_fotos"),
                 rs.getInt("total_listas")
         ));
@@ -285,7 +285,7 @@ public class EstadisticasRepository {
         String sql = """
                 SELECT 
                     ciudad AS region, 
-                    SUM(total_reseñas) AS total_resenas_por_ciudad
+                    SUM(total_resenas) AS total_resenas_por_ciudad
                 FROM 
                     sitios_turisticos
                 WHERE 
